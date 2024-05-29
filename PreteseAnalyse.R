@@ -1,7 +1,7 @@
 library(tidyverse)
 
 #import data
-#data <- read_csv("pretest_data.csv")
+data <- read_csv("pretest_data.csv")
 
 
 #filter for outfits only
@@ -33,6 +33,16 @@ konsistenz <- reduce_columns(data_outfits_konsistenz)[,37:48]
 konsistenz_mean <- konsistenz %>%
   summarise(across(everything(), mean, na.rm = TRUE)) %>%
   t()
+
+#do the same with liking
+data_outfits_liking <- data_outfits[, grepl("Liking", names(data_outfits))]
   
+liking_mean <- reduce_columns(data_outfits_liking)[,37:48] %>%
+  summarise(across(everything(), mean, na.rm = TRUE)) %>%
+  t()
+
+#overview of Konsistenz and Liking of the outfits
+konsistenzXliking <- merge(konsistenz_mean, liking_mean, by = "row.names", all = TRUE)
+
 
 
