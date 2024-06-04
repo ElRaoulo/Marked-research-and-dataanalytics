@@ -92,22 +92,3 @@ ubersicht <- cbind(jacke_hipiie2_mean, jacke_min2_mean)
 ggplot(jacke_hippie2_preiserwartung, aes())
 
 
-
-
-
-
-
-
-
-
-# Boxplot erstellen
-ggplot(Jacke_data_filtered, aes(x = Product_type, y= Preiserwartung, fill=fill_color)) +
-  geom_boxplot(position = position_dodge(width = 0.75)) + 
-  geom_point(stat = "summary", fun = mean, size = 3, shape = 18, color = "red") + 
-  scale_fill_manual(values = c("1" = "grey", "2" = "#00CED1")) +
-  labs(x = "Product Type", 
-       y = "Preiserwartung ()", 
-       title = "Boxplot der Preiserwartung Jacken") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
