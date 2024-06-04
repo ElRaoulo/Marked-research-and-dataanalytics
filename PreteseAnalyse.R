@@ -101,13 +101,13 @@ ggplot(jacke_hippie2_preiserwartung, aes())
 
 
 # Boxplot erstellen
-ggplot(Jacke_data_filtered, aes(x = Product_type, y= Komplexität, fill=fill_color)) +
+ggplot(Jacke_data_filtered, aes(x = Product_type, y= Preiserwartung, fill=fill_color)) +
   geom_boxplot(position = position_dodge(width = 0.75)) + 
   geom_point(stat = "summary", fun = mean, size = 3, shape = 18, color = "red") + 
   scale_fill_manual(values = c("1" = "grey", "2" = "#00CED1")) +
   labs(x = "Product Type", 
-       y = "Komplexität (1= 'sehr komplex', ... , 5='gar nicht komplex')", 
-       title = "Boxplot der Komplexitätswahrnehmung Jacken") +
+       y = "Preiserwartung ()", 
+       title = "Boxplot der Preiserwartung Jacken") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
