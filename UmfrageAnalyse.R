@@ -2,11 +2,16 @@ library(tidyverse)
 
 #import data
 data <- read_csv("hauptstudie_data_renamed1.csv")
-#sustition probe
-#263, 259
+data <- rename(data, "SuspicionProbe" =  "Suspicion Probe")
 
 
-demographics <- c("Alter", "Geschlecht", "Beruf", "Einkommen")
+
+Suspicion <- select(data, "SuspicionProbe")
+#Es gibt keine Teilnehmer, die Vermutet haben, dass Aufmerksamkeitsallokation untersucht wurde.
+#-> alle Daten können verwendet werden
+
+
+demographics <- c("Alter", "Geschlecht", "Beruf", "Einkommen", "SuspicionProbe")
 
 #get the relevant data
 data_attention <- data %>%
@@ -17,16 +22,7 @@ data_attention <- data %>%
 data_attention <- data_attention %>%
   mutate(across(where(is.numeric), ~if_else(. < 0, NA, .)))
 
-#write.csv(data_attention, "attention_data.csv", row.names = TRUE)
 
-# data_attention <- data_attention %>%
-#   mutate(across(contains("Stil"), 
-#                 ~case_when(
-#                   . == 1 ~ "Minimalismus",
-#                   . == 2 ~ "Hippie",
-#                   . == 3 ~ "HipHop",
-#                   TRUE ~ as.character(.)
-#                 )))
 
 
 #data_compact <- data.frame(data_attention[1])
@@ -61,39 +57,37 @@ data_attention_long <- data_attention %>%
 data_attention_long <- data_attention_long[!is.na(data_attention_long$Rating), ]
 
 clean_data <- pivot_wider(data = data_attention_long, 
-                                id_cols = c(Alter, Geschlecht, Beruf, Einkommen, Product, Group), 
+                                id_cols = c(SuspicionProbe, Alter, Geschlecht, Beruf, Einkommen, Product, Group), 
                                 names_from = Attribute, 
                                 values_from = Rating, 
                                 values_fn = list(Rating = function(x) x[1]))
 
 
+clean_data <- clean_data %>%
+  mutate(across(8:ncol(clean_data), as.character))%>%
+  mutate(across(8:ncol(clean_data), as.numeric))
 
 clean_data <- clean_data %>%
-  mutate(across(starts_with("Wertigkeit"), as.character)) %>%
-  mutate(across(starts_with("Wertigkeit"), as.numeric)) %>%
-  mutate(Wertigkeit = rowMeans(across(starts_with("Wertigkeit")), na.rm = TRUE))
-
-
-clean_data <- clean_data %>%
-  mutate(across(starts_with("Liking"), as.character)) %>%
-  mutate(across(starts_with("Liking"), as.numeric)) %>%
-  mutate(Liking = rowMeans(across(starts_with("Liking")), na.rm = TRUE))
-
-
-clean_data <- clean_data %>%
-  mutate(across(starts_with("Fluency"), as.character)) %>%
-  mutate(across(starts_with("Fluency"), as.numeric)) %>%
-  mutate(Fluency = rowMeans(across(starts_with("Fluency")), na.rm = TRUE))
-
-
-clean_data <- clean_data %>%
-  mutate(across(starts_with("Konsistenz"), as.character)) %>%
-  mutate(across(starts_with("Konsistenz"), as.numeric)) %>%
+  mutate(Wertigkeit = rowMeans(across(starts_with("Wertigkeit")), na.rm = TRUE))%>%
+  mutate(Liking = rowMeans(across(starts_with("Liking")), na.rm = TRUE))%>%
+  mutate(Fluency = rowMeans(across(starts_with("Fluency")), na.rm = TRUE))%>%
   mutate(Konsistenz = rowMeans(across(starts_with("Konsistenz")), na.rm = TRUE))
 
 clean_data <- clean_data %>%
-  mutate(across(7:ncol(clean_data), as.character))%>%
-  mutate(across(7:ncol(clean_data), as.numeric))
+  mutate(across(contains("Stil"),
+                ~case_when(
+                  . == 1 ~ "Minimalismus",
+                  . == 2 ~ "Hippie",
+                  . == 3 ~ "HipHop",
+                  TRUE ~ as.character(.)
+                )))
+
+##################################################
+
+#       VISUALISIERUNG
+
+##################################################
+
 
 #Boxplot Preiserwartung aller daten
 
@@ -103,7 +97,7 @@ clean_data_boxplot <- clean_data %>%
 ggplot(clean_data_boxplot, aes(x = Product, y = Preiserwartung, fill = Group)) +
   geom_boxplot() +
   scale_y_continuous(limits = c(0, 300)) +
-  labs(x = "Group", y = "Preiserwartung in Euro", title = "Boxplot der Preiserwartung nach Gruppe") +
+  labs(x = "Produkt", y = "Preiserwartung in Euro", title = "Boxplot der Preiserwartung nach Gruppe") +
   theme_minimal() 
 
 
@@ -137,9 +131,23 @@ ggplot(clean_data, aes(x = Product, y = Liking, fill = Group)) +
   theme_minimal()
 
 
+#Boxplot outfits Fluency
+
+clean_data_outfits <- clean_data %>%
+  filter(Product == "outfit")
+
+ggplot(clean_data_outfits, aes(x = Group, y = Fluency, fill = Group)) +
+  geom_boxplot() +
+  labs(x = "Group", y = "Fluency", title = "Boxplot der Fluency nach Gruppe") +
+  theme_minimal()
 
 
+#Boxplot outfits Konsistenz
 
+ggplot(clean_data_outfits, aes(x = Group, y = Konsistenz, fill = Group)) +
+  geom_boxplot() +
+  labs(x = "Group", y = "Konsistenz", title = "Boxplot der Fluency nach Gruppe") +
+  theme_minimal()
 
 
 
